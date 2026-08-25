@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>勇者小隊隱藏人設鑑定</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Noto+Sans+TC:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'pixel-yellow': '#F4D03F',
+            'pixel-blue': '#B9D5F5',
+            'pixel-sky': '#E6F0FA',
+            'pixel-surface': '#FCF8ED',
+            'pixel-border': '#1A1A1A',
+            'pixel-btn-border-b': '#D4AC0D',
+            'pixel-btn-border-r': '#F1C40F',
+            'pixel-bg-dim': '#E0E0E0',
+          },
+          fontFamily: {
+            'pixel': ['"Press Start 2P"', 'monospace'],
+            'sans': ['"Noto Sans TC"', 'sans-serif'],
+          },
+          boxShadow: {
+            'pixel': '4px 4px 0 0 rgba(26, 26, 26, 1)',
+            'pixel-inner': 'inset 4px 4px 0 0 rgba(255, 255, 255, 0.4), inset -4px -4px 0 0 rgba(0, 0, 0, 0.2)',
+          }
+        }
+      }
+    }
+  </script>
+  <style data-purpose="custom-utilities">
+    .pixelated { image-rendering: pixelated; }
+    .border-pixel { border: 4px solid #1A1A1A; }
+    input::placeholder {
+      color: #9CA3AF;
+      font-family: "Press Start 2P", monospace;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex justify-center min-h-screen font-sans antialiased text-gray-800">
+  <div class="w-full max-w-[400px] h-full min-h-[850px] relative bg-pixel-blue overflow-hidden shadow-2xl flex flex-col">
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <div class="absolute top-32 left-0 w-32 h-32 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
+      <div class="absolute top-64 right-0 w-48 h-48 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
+    </div>
+    <main class="flex-1 relative z-10 flex flex-col px-6 pt-12 pb-24 items-center">
+      <h1 class="text-xl font-bold text-center mb-6 tracking-wide drop-shadow-sm font-sans">
+        勇者小隊隱藏人設鑑定
+      </h1>
+      <div class="bg-pixel-yellow p-4 mb-6 relative z-10 w-full shadow-pixel" data-purpose="intro-description">
+        <div class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></div>
+        <p class="text-[13px] leading-relaxed font-semibold tracking-wide">
+          國王下令討伐魔王，但這支在酒館臨時拼湊的小隊似乎怪怪的......？<br/>
+          一路上充滿了荒謬的突發狀況！面對這趟不受控的旅程，你會如何應對？<br/>
+          來測測你在這個團隊中，究竟是神仙大腿，還是搞笑雷包！
+        </p>
+      </div>
+
+      <div class="bg-pixel-surface w-full p-6 shadow-pixel relative z-10" data-purpose="character-form">
+        <div class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-bold mb-2 tracking-widest" for="hero-name">
+            勇者的大名是......
+          </label>
+          <input class="w-full border-pixel px-4 py-3 bg-white text-lg font-pixel focus:outline-none focus:ring-2 focus:ring-pixel-yellow transition-colors" id="hero-name" placeholder="???" type="text"/>
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-sm font-bold mb-3 tracking-widest">
+            勇者的形象是......
+          </label>
+          <div class="flex justify-between gap-4">
+            <!-- Female Hero Option -->
+            <label class="flex-1 cursor-pointer group relative">
+              <input class="peer sr-only" name="hero_gender" type="radio" value="female"/>
+              <div class="bg-pixel-bg-dim p-2 flex flex-col items-center border-4 border-transparent peer-checked:border-pixel-yellow transition-colors pb-3 bg-white shadow-[inset_0_0_0_2px_#E0E0E0]">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm border border-gray-200">
+                  <!-- 指向 Assets 資料夾 -->
+                  <img alt="Female Hero Sprite" class="w-12 h-12 pixelated object-contain" src="./Assets/female.png"/>
+                </div>
+                <span class="text-sm font-bold text-gray-700">女勇者</span>
+              </div>
+            </label>
+            <!-- Male Hero Option -->
+            <label class="flex-1 cursor-pointer group relative">
+              <input checked="" class="peer sr-only" name="hero_gender" type="radio" value="male"/>
+              <div class="bg-pixel-bg-dim p-2 flex flex-col items-center border-4 border-transparent peer-checked:border-pixel-yellow transition-colors pb-3 bg-white shadow-[inset_0_0_0_2px_#E0E0E0]">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm border border-gray-200">
+                  <!-- 指向 Assets 資料夾 -->
+                  <img alt="Male Hero Sprite" class="w-12 h-12 pixelated object-contain" src="./Assets/male.png"/>
+                </div>
+                <span class="text-sm font-bold text-gray-700">男勇者</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button id="start-btn" class="w-full bg-pixel-yellow py-3 px-4 text-center font-bold text-gray-900 border-t-2 border-l-2 border-white border-b-4 border-r-4 border-b-pixel-btn-border-b border-r-pixel-btn-border-r shadow-sm active:translate-y-1 active:border-b-2 active:border-r-2 transition-transform select-none" type="button">
+          推開酒館大門，開始冒險
+        </button>
+      </div>
+    </main>
+
+    <div class="absolute bottom-0 left-0 w-full z-20 flex flex-col h-24" data-purpose="ground-decoration">
+      <div class="h-8 w-full bg-[#7CB342] pixelated flex" style="background-image: linear-gradient(90deg, #689F38 25%, transparent 25%, transparent 50%, #558B2F 50%, #558B2F 75%, transparent 75%, transparent); background-size: 32px 100%;"></div>
+      <div class="flex-1 w-full bg-[#795548] pixelated flex" style="background-image: linear-gradient(90deg, #5D4037 25%, transparent 25%, transparent 50%, #4E342E 50%, #4E342E 75%, transparent 75%, transparent); background-size: 64px 100%;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('start-btn').addEventListener('click', function() {
+      const heroName = document.getElementById('hero-name').value.trim();
+      if (!heroName) {
+        alert("請輸入勇者的大名！");
+        return;
+      }
+
+      const gender = document.querySelector('input[name="hero_gender"]:checked').value;
+
+      localStorage.setItem('rpg_userName', heroName);
+      localStorage.setItem('rpg_userGender', gender);
+      localStorage.setItem('rpg_currentQuestionIndex', '0');
+
+      const initialScores = { L: 0, O: 0, I: 0, D: 0, E: 0, G: 0, C: 0, V: 0 };
+      localStorage.setItem('rpg_scores', JSON.stringify(initialScores));
+
+      // 跳轉到測驗頁面
+      window.location.href = 'Quiz.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Cozy Pixel - Result Transition</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'surface': '#fdf9ef',
+            'surface-dim': '#dddad0',
+            'primary': '#ffd93d',
+            'on-primary': '#423300',
+            'secondary': '#d9d9d9',
+            'on-secondary': '#1e1b16',
+            'background': '#b4d4f4',
+            'shadow-color': '#000000',
+            'pixel-grass': '#79c733',
+            'pixel-grass-dark': '#559922',
+            'pixel-dirt': '#8b5a2b',
+            'pixel-dirt-dark': '#5c3a21',
+          },
+          fontFamily: {
+            'pixel': ['"Press Start 2P"', 'monospace', 'sans-serif'],
+          },
+          boxShadow: {
+            'pixel': '4px 4px 0px 0px rgba(0, 0, 0, 0.1)',
+            'pixel-active': '2px 2px 0px 0px rgba(0, 0, 0, 0.1)',
+            'pixel-light': '4px 4px 0px 0px rgba(255, 255, 255, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
+  <style data-purpose="custom-utilities">
+    body {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 1px;
+      line-height: 1.6;
+    }
+    .pixel-border {
+      border: 4px solid white;
+      box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.1);
+    }
+    .pixel-button {
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .pixel-button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.1);
+    }
+    .pixel-ground {
+      background-image:
+        linear-gradient(to bottom,
+          #79c733 0%, #79c733 20%,
+          #559922 20%, #559922 30%,
+          #8b5a2b 30%, #8b5a2b 60%,
+          #5c3a21 60%, #5c3a21 100%
+        );
+      background-size: 100% 100%;
+      image-rendering: pixelated;
+    }
+    .pixel-ground::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image:
+            radial-gradient(#559922 15%, transparent 16%),
+            radial-gradient(#559922 15%, transparent 16%),
+            radial-gradient(#5c3a21 15%, transparent 16%),
+            radial-gradient(#5c3a21 15%, transparent 16%);
+        background-size: 16px 16px;
+        background-position: 0 0, 8px 8px, 0 32px, 8px 40px;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex justify-center items-center min-h-screen m-0 p-0 overflow-hidden text-xs sm:text-sm">
+  <main class="w-[375px] h-[812px] bg-background relative flex flex-col mx-auto overflow-hidden shadow-2xl">
+    <header class="w-full h-[44px] flex justify-between items-center px-6 pt-2 z-50 absolute top-0 text-black font-sans font-semibold text-[14px]">
+      <div class="time tracking-tight">9:41</div>
+      <div class="icons flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M1 12H3V15H1V12ZM5 9H7V15H5V9ZM9 6H11V15H9V6ZM13 2H15V15H13V2Z"></path></svg>
+        <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1.5C4.5 1.5 1.2 3.2 -0.5 6L8 15L16.5 6C14.8 3.2 11.5 1.5 8 1.5ZM8 12.5L2 6.2C3.5 4.3 5.7 3 8 3C10.3 3 12.5 4.3 14 6.2L8 12.5Z"></path></svg>
+        <svg class="w-6 h-3" fill="currentColor" viewbox="0 0 24 12" xmlns="http://www.w3.org/2000/svg"><rect fill="none" height="10" rx="2.5" stroke="currentColor" stroke-width="1.5" width="20" x="1" y="1"></rect><rect height="6" rx="1" width="16" x="3" y="3"></rect><path d="M22 4V8C22.8 8 23 7.5 23 6C23 4.5 22.8 4 22 4Z"></path></svg>
+      </div>
+    </header>
+
+    <section class="flex-grow flex flex-col justify-center items-center px-8 relative z-10 pt-20 pb-40">
+      <article class="bg-primary text-on-primary w-full p-6 pixel-border mb-16 relative">
+        <p class="leading-relaxed whitespace-pre-wrap break-words">結束了討伐魔王的旅程，你終於拖著疲憊
+卻又愉悅的心情回到了家！
+恭喜你今天又拯救了世界！</p>
+      </article>
+
+      <!-- 動態切換區塊 -->
+      <div id="dynamic-area" class="w-full flex justify-center items-center mt-auto mb-10 h-[80px]">
+        <!-- 狀態 1：計算中 (預設顯示) -->
+        <p id="loading-text" class="text-sm font-bold animate-pulse text-gray-800 tracking-widest">
+          正在計算你的雷包指數・・・
+        </p>
+
+        <!-- 狀態 2：按鈕 (預設隱藏) -->
+        <button id="result-btn" class="hidden bg-secondary text-on-secondary w-[85%] py-6 px-4 pixel-border pixel-button flex justify-center items-center cursor-pointer">
+          <span>點擊查看勇者的隱藏人設！</span>
+        </button>
+      </div>
+    </section>
+
+    <footer class="absolute bottom-0 w-full h-[120px] pixel-ground z-0">
+      <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-black rounded-full z-50"></div>
+    </footer>
+  </main>
+
+  <!-- JS 大腦：控制時間與跳轉 -->
+  <script>
+    // 設定計時器，2500毫秒 (2.5秒) 後執行
+    setTimeout(() => {
+      // 隱藏閃爍文字
+      document.getElementById('loading-text').classList.add('hidden');
+      // 顯示按鈕
+      document.getElementById('result-btn').classList.remove('hidden');
+    }, 2500);
+
+    // 監聽按鈕點擊，跳轉到最後的結果頁
+    document.getElementById('result-btn').addEventListener('click', () => {
+      window.location.href = 'Result.html';
+    });
+  </script>
+</body>
+</html>
