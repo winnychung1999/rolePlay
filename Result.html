@@ -141,8 +141,7 @@
           </div>
           <div class="flex-1 p-2 bg-light-gray-header flex flex-col items-center justify-center min-h-[80px]">
             <div id="combo-img-container" class="flex justify-center gap-2 mb-1 w-full flex-wrap"></div>
-            <span id="combo-text" class="text-[10px] font-bold text-center mt-1 text-gray-800 leading-tight w-full"></span>
-          </div>
+             </div>
         </div>
 
         <div class="w-1/2 pixel-border bg-white flex flex-col">
@@ -151,8 +150,7 @@
           </div>
           <div class="flex-1 p-2 bg-light-gray-header flex flex-col items-center justify-center min-h-[80px]">
              <div id="enemy-img-container" class="flex justify-center gap-2 mb-1 w-full flex-wrap"></div>
-             <span id="enemy-text" class="text-[10px] font-bold text-center mt-1 text-gray-800 leading-tight w-full"></span>
-          </div>
+               </div>
         </div>
       </section>
 
@@ -191,18 +189,75 @@
     .then(data => {
       charactersDatabase = data;
 
-      // 3. 計算最高分角色
-      let highestScore = -1;
-      matchedCharacter = charactersDatabase[0];
+      // 3. 計算最高分角色 (支援官方同分優先順位 + 方案二：最高屬性門檻過濾)
 
-      charactersDatabase.forEach(char => {
-        let currentTotal = 0;
-        char.attributes.forEach(attr => { currentTotal += (userScores[attr] || 0); });
-        if (currentTotal > highestScore) {
-          highestScore = currentTotal;
-          matchedCharacter = char;
+      const priorityOrder = [
+        "精算軍師",
+        "硬核隊長",
+        "千面間諜",
+        "尋寶獵人",
+        "混亂魔法師",
+        "派對精靈",
+        "治癒牧師",
+        "天選勇者",
+        "無辜村民",
+        "吃瓜旅人"
+      ];
+
+      // 第一步：找出玩家單項最高分的屬性是誰 (抓出靈魂屬性)
+      let maxSingleAttrScore = -1;
+      let topAttributes = [];
+
+      for (let attr in userScores) {
+        let score = Number(userScores[attr] || 0);
+        if (score > maxSingleAttrScore) {
+          maxSingleAttrScore = score;
+          topAttributes = [attr];
+        } else if (score === maxSingleAttrScore) {
+          // 如果有多個並列最高分的屬性，就一起加進名單
+          topAttributes.push(attr);
         }
+      }
+
+      // 第二步：發放決賽入場券 (過濾出擁有玩家最高分屬性的角色)
+      let eligibleCharacters = charactersDatabase.filter(char => {
+        // 只要角色的屬性中，包含玩家的最高分屬性之一，就給過
+        return char.attributes.some(attr => topAttributes.includes(attr));
       });
+
+      // 防呆機制：如果極端情況下全部被淘汰，就讓所有角色敗部復活
+      if (eligibleCharacters.length === 0) {
+        eligibleCharacters = charactersDatabase;
+      }
+
+      // 第三步：幫晉級決賽的角色計算總分
+      let scoredCharacters = eligibleCharacters.map(char => {
+        let currentTotal = 0;
+        char.attributes.forEach(attr => {
+          currentTotal += Number(userScores[attr] || 0);
+        });
+        return { char: char, score: currentTotal };
+      });
+
+      // 第四步：找出晉級名單中的最高總分
+      let highestTotalScore = Math.max(...scoredCharacters.map(item => item.score));
+
+      // 第五步：抓出所有達到「最高總分」的候選角色
+      let topCandidates = scoredCharacters.filter(item => item.score === highestTotalScore).map(item => item.char);
+
+      // 第六步：終極同分對決（依照 priorityOrder 查表排序）
+      topCandidates.sort((a, b) => {
+        let indexA = priorityOrder.indexOf(a.name);
+        let indexB = priorityOrder.indexOf(b.name);
+
+        if (indexA === -1) indexA = 999;
+        if (indexB === -1) indexB = 999;
+
+        return indexA - indexB;
+      });
+
+      // 最終結果：拿排序後的第一名！
+      matchedCharacter = topCandidates[0] || charactersDatabase[0];
 
       // 4. 動態更換背景色 (加入 'C4'，即 77% 透明度)
       document.getElementById('capture-area').style.backgroundColor = matchedCharacter.color + 'C4';
@@ -246,24 +301,33 @@
       });
 
       // 7. 渲染連擊/傷害頭像
-      renderMiniAvatars('combo-img-container', 'combo-text', matchedCharacter.combo);
-      renderMiniAvatars('enemy-img-container', 'enemy-text', matchedCharacter.enemy);
+      renderMiniAvatars('combo-img-container', matchedCharacter.combo);
+      renderMiniAvatars('enemy-img-container', matchedCharacter.enemy);
+
     })
     .catch(error => {
       console.error(error);
       alert('無法載入角色資料，請確認是否使用 Live Server 開啟！');
     });
 
-  // 輔助函數：渲染底部連擊圖片
-  function renderMiniAvatars(containerId, textId, charNames) {
+  // 輔助函數：渲染底部連擊圖片與專屬名字 (新寫法：圖與名字綁定)
+  function renderMiniAvatars(containerId, charNames) {
     const container = document.getElementById(containerId);
-    document.getElementById(textId).innerText = charNames.join('、');
+    container.innerHTML = ''; // 清空容器
 
     charNames.forEach(name => {
       const foundChar = charactersDatabase.find(c => c.name === name);
       if (foundChar) {
         const imgSrc = userGender === 'female' ? foundChar.femaleImg : foundChar.maleImg;
-        container.innerHTML += `<div class="w-16 h-20 bg-white border-2 border-[#3e2723] overflow-hidden shrink-0"><img src="${imgSrc}" class="w-full h-full object-cover p-0.5"/></div>`;
+        // 把每個頭像和名字包在同一個 flex-col 的小盒子裡
+        container.innerHTML += `
+          <div class="flex flex-col items-center gap-1">
+            <div class="w-16 h-20 bg-white border-2 border-[#3e2723] overflow-hidden shrink-0">
+              <img src="${imgSrc}" class="w-full h-full object-cover p-0.5"/>
+            </div>
+            <span class="text-[10px] font-bold text-gray-800 leading-tight">${name}</span>
+          </div>
+        `;
       }
     });
   }
