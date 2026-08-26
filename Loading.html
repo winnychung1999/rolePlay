@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -17,12 +17,6 @@
             'on-primary': '#423300',
             'secondary': '#d9d9d9',
             'on-secondary': '#1e1b16',
-            'background': '#b4d4f4',
-            'shadow-color': '#000000',
-            'pixel-grass': '#79c733',
-            'pixel-grass-dark': '#559922',
-            'pixel-dirt': '#8b5a2b',
-            'pixel-dirt-dark': '#5c3a21',
           },
           fontFamily: {
             'pixel': ['"Press Start 2P"', 'monospace', 'sans-serif'],
@@ -30,7 +24,6 @@
           boxShadow: {
             'pixel': '4px 4px 0px 0px rgba(0, 0, 0, 0.1)',
             'pixel-active': '2px 2px 0px 0px rgba(0, 0, 0, 0.1)',
-            'pixel-light': '4px 4px 0px 0px rgba(255, 255, 255, 0.5)',
           }
         }
       }
@@ -42,10 +35,15 @@
       letter-spacing: 1px;
       line-height: 1.6;
     }
+
+    /* 確保背景放大時保持像素清晰度 */
+    .pixelated { image-rendering: pixelated; }
+
     .pixel-border {
       border: 4px solid white;
       box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.1);
     }
+
     .pixel-button {
       transition: transform 0.1s, box-shadow 0.1s;
     }
@@ -53,60 +51,40 @@
       transform: translate(2px, 2px);
       box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.1);
     }
-    .pixel-ground {
-      background-image:
-        linear-gradient(to bottom,
-          #79c733 0%, #79c733 20%,
-          #559922 20%, #559922 30%,
-          #8b5a2b 30%, #8b5a2b 60%,
-          #5c3a21 60%, #5c3a21 100%
-        );
-      background-size: 100% 100%;
-      image-rendering: pixelated;
-    }
-    .pixel-ground::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image:
-            radial-gradient(#559922 15%, transparent 16%),
-            radial-gradient(#559922 15%, transparent 16%),
-            radial-gradient(#5c3a21 15%, transparent 16%),
-            radial-gradient(#5c3a21 15%, transparent 16%);
-        background-size: 16px 16px;
-        background-position: 0 0, 8px 8px, 0 32px, 8px 40px;
-        opacity: 0.5;
-        pointer-events: none;
-    }
   </style>
 </head>
-<body class="bg-gray-900 flex justify-center items-center min-h-screen m-0 p-0 overflow-hidden text-xs sm:text-sm">
-  <main class="w-[375px] h-[812px] bg-background relative flex flex-col mx-auto overflow-hidden shadow-2xl">
 
+<!-- 重點 1：將 background.png 設為 body 的背景，並加上 pixelated -->
+<body class="flex justify-center min-h-[100dvh] m-0 p-0 text-xs sm:text-sm bg-bottom bg-cover bg-no-repeat pixelated" style="background-image: url('./Assets/backgroundLanding.png');">
 
-    <section class="flex-grow flex flex-col justify-center items-center px-8 relative z-10 pt-20 pb-40">
-      <article class="bg-primary text-on-primary w-full p-6 pixel-border mb-16 relative">
-        <p class="leading-relaxed whitespace-pre-wrap break-words">結束了討伐魔王的旅程，你終於拖著疲憊
-卻又愉悅的心情回到了家！
+  <!-- 重點 2：透明的核心容器，限制寬度以模擬手機畫面，並使用 100dvh -->
+  <main class="w-full max-w-[400px] h-[100dvh] relative flex flex-col mx-auto px-6">
+
+    <!-- 內容區塊 (垂直置中偏下，避開天空，靠近草地) -->
+    <section class="flex-grow flex flex-col justify-center items-center relative z-10 pt-10 pb-20">
+
+      <!-- 提示文字框 -->
+      <article class="bg-primary text-on-primary w-full p-6 pixel-border mb-12 relative">
+        <p class="leading-relaxed whitespace-pre-wrap break-words">結束了討伐魔王的旅程，你終於拖著疲憊卻又愉悅的心情回到了家！
 恭喜你今天又拯救了世界！</p>
       </article>
 
       <!-- 動態切換區塊 -->
-      <div id="dynamic-area" class="w-full flex justify-center items-center mt-auto mb-10 h-[80px]">
+      <div id="dynamic-area" class="w-full flex justify-center items-center h-[80px]">
         <!-- 狀態 1：計算中 (預設顯示) -->
-        <p id="loading-text" class="text-sm font-bold animate-pulse text-gray-800 tracking-widest">
+        <p id="loading-text" class="text-sm font-bold animate-pulse text-gray-800 tracking-widest bg-white/70 p-3 rounded pixel-border">
           正在計算你的雷包指數・・・
         </p>
 
         <!-- 狀態 2：按鈕 (預設隱藏) -->
-        <button id="result-btn" class="hidden bg-secondary text-on-secondary w-[85%] py-6 px-4 pixel-border pixel-button flex justify-center items-center cursor-pointer">
-          <span>點擊查看勇者的隱藏人設！</span>
+        <button id="result-btn" class="hidden bg-secondary text-on-secondary w-full py-6 px-4 pixel-border pixel-button flex justify-center items-center cursor-pointer">
+          <span class="font-bold">點擊查看勇者的隱藏人設！</span>
         </button>
       </div>
     </section>
 
-    <footer class="absolute bottom-0 w-full h-[120px] pixel-ground z-0">
-      </footer>
+    <!-- 已經移除了原本用 CSS 畫的假草地，因為背景圖自帶了！ -->
+
   </main>
 
   <!-- JS 大腦：控制時間與跳轉 -->
