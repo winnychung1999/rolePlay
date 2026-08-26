@@ -5,51 +5,123 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>RPG Questionnaire</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Noto+Sans+TC:wght@400;700&amp;display=swap" rel="stylesheet"/>
   <script>
-    let questionsData = []; // 先準備一個空陣列來裝 JSON 資料
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'pixel-yellow': '#F4D03F',
+            'pixel-surface': '#FCF8ED',
+            'pixel-btn-border-b': '#D4AC0D',
+            'pixel-btn-border-r': '#F1C40F',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 確保背景放大時保持像素清晰度 */
+    .pixelated { image-rendering: pixelated; }
+
+    /* 像素風格的框線與陰影 */
+    .pixel-border-box {
+      border: 4px solid #1A1A1A;
+    }
+    .shadow-pixel {
+      box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 1);
+    }
+
+    /* 選項按鈕的微互動效果 */
+    .pixel-button {
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .pixel-button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 rgba(26, 26, 26, 1);
+    }
+  </style>
+</head>
+
+<!-- 將 body 設為滿版，並加入 transition-all 讓背景切換時有漸變效果 -->
+<body id="game-body" class="flex justify-center min-h-[100dvh] font-sans antialiased text-gray-800 bg-center bg-cover bg-no-repeat pixelated transition-all duration-700">
+
+  <!-- 透明的核心容器，限制寬度以模擬手機畫面 -->
+  <main class="w-full max-w-[400px] h-[100dvh] relative flex flex-col justify-center px-6 py-8 z-10">
+
+    <!-- 頂部：動態進度條容器 -->
+    <div id="progress-bar-container" class="w-full bg-white pixel-border-box p-1.5 flex space-x-1 shadow-pixel mb-6 bg-white/90 backdrop-blur-sm">
+      <!-- JS 會在這裡自動生成進度條 -->
+    </div>
+
+    <!-- 內容區塊 -->
+    <div class="flex-1 flex flex-col justify-center w-full space-y-5 overflow-y-auto pb-4">
+
+      <!-- 動態題目容器 -->
+      <div id="question-text" class="w-full bg-pixel-yellow pixel-border-box p-5 text-sm font-bold leading-relaxed shadow-pixel relative">
+        <div class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></div>
+        載入中...
+      </div>
+
+      <!-- 動態選項容器 -->
+      <div id="options-container" class="w-full flex flex-col space-y-4 pt-2">
+        <!-- JS 會在這裡自動生成按鈕 -->
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let questionsData = [];
     let currentIndex = parseInt(localStorage.getItem('rpg_currentQuestionIndex')) || 0;
     let scores = JSON.parse(localStorage.getItem('rpg_scores')) || { L: 0, O: 0, I: 0, D: 0, E: 0, G: 0, C: 0, V: 0 };
 
-    // 1. 使用 fetch 讀取旁邊的 questions.json
+    // 1. 讀取題目 JSON
     fetch('./questions.json')
       .then(response => {
         if (!response.ok) throw new Error('找不到題目檔案啦！');
         return response.json();
       })
       .then(data => {
-        questionsData = data; // 把讀取到的資料存進大腦
-        renderQuestion();     // 資料準備好後，開始印出畫面
+        questionsData = data;
+        renderQuestion();
       })
       .catch(error => {
         console.error(error);
         document.getElementById('question-text').innerText = "讀取題目失敗，請確認有沒有用 Live Server 開啟網頁！";
       });
 
-    // 2. 負責渲染畫面的函數 (跟之前一樣)
+    // 2. 負責渲染畫面的函數
     function renderQuestion() {
       if (!questionsData || questionsData.length === 0) return;
-
       const currentQ = questionsData[currentIndex];
+
+      // 依照 chapter 動態替換背景圖片
+      const gameBody = document.getElementById('game-body');
+      gameBody.style.backgroundImage = `url('./Assets/Quiz${currentQ.chapter}.png')`;
+
+      // 更新題目文字
       document.getElementById('question-text').innerText = currentQ.scenario;
 
+      // 更新選項按鈕
       const optionsContainer = document.getElementById('options-container');
       optionsContainer.innerHTML = '';
-
       currentQ.options.forEach(option => {
         const btn = document.createElement('button');
-        btn.className = "w-full text-left bg-[#e8e6df] pixel-border-box p-4 text-sm leading-relaxed pixel-button shadow-pixel";
-        btn.innerText = option.text;
+        // 套用 Tailwind 與自訂的像素風 class
+        btn.className = "w-full text-left bg-pixel-surface border-4 border-[#1A1A1A] p-4 text-sm font-bold leading-relaxed pixel-button shadow-pixel relative";
 
+        btn.innerHTML = `<span class="relative z-10">${option.text}</span>`;
         btn.onclick = () => handleOptionClick(option.scores);
         optionsContainer.appendChild(btn);
       });
 
+      // 更新進度條
       const progressContainer = document.getElementById('progress-bar-container');
       progressContainer.innerHTML = '';
       for (let i = 0; i < questionsData.length; i++) {
         const block = document.createElement('div');
-        block.className = `h-3 flex-1 ${i <= currentIndex ? 'bg-[#4a4a18]' : 'bg-[#d3d0b8]'}`;
+        block.className = `h-2 flex-1 ${i <= currentIndex ? 'bg-[#1A1A1A]' : 'bg-gray-200'} border border-white`;
         progressContainer.appendChild(block);
       }
     }
@@ -59,164 +131,16 @@
       for (const key in optionScores) {
         scores[key] += optionScores[key];
       }
-
       localStorage.setItem('rpg_scores', JSON.stringify(scores));
-
       currentIndex++;
       localStorage.setItem('rpg_currentQuestionIndex', currentIndex);
 
       if (currentIndex < questionsData.length) {
         renderQuestion();
       } else {
-        window.location.href = 'Loading.html'; // 答完跳轉
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .mobile-container {
-      width: 100%;
-      max-width: 390px;
-      height: 844px;
-      background-color: #BDE0FE;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    .bg-block-1 {
-      position: absolute; top: 20%; left: 0; width: 40%; height: 20%; background-color: #E0F4FF; z-index: 0;
-    }
-    .pixel-border-box {
-      border: 4px solid white;
-      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
-    }
-    .pixel-button { transition: all 0.1s; }
-    .pixel-button:active {
-      transform: translate(2px, 2px); box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
-    }
-    .pixel-ground {
-      height: 100px; width: 100%; position: absolute; bottom: 0; z-index: 10; image-rendering: pixelated;
-      background-image: linear-gradient(to bottom, #7bb53c 20%, #4a3018 20%);
-    }
-    .pixel-ground::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 20px;
-      background-image: linear-gradient(45deg, #62962d 25%, transparent 25%, transparent 75%, #62962d 75%, #62962d),
-                        linear-gradient(45deg, #62962d 25%, transparent 25%, transparent 75%, #62962d 75%, #62962d);
-      background-size: 20px 20px; background-position: 0 0, 10px 10px;
-    }
-  </style>
-</head>
-<body class="font-pixel text-gray-800">
-  <main class="mobile-container relative">
-    <div class="bg-block-1"></div>
-
-    <div class="flex-1 flex flex-col items-center px-6 pt-12 pb-32 z-10 space-y-12 relative overflow-y-auto">
-
-      <!-- 動態進度條容器 -->
-      <div id="progress-bar-container" class="w-[90%] bg-white pixel-border-box p-2 flex space-x-1">
-        <!-- JS 會在這裡自動生成 11 格進度條 -->
-      </div>
-
-      <!-- 動態題目容器 -->
-      <div id="question-text" class="w-full bg-pixel-yellow pixel-border-box p-5 text-lg leading-relaxed shadow-pixel">
-        載入中...
-      </div>
-
-      <!-- 動態選項容器 -->
-      <div id="options-container" class="w-full flex flex-col space-y-4">
-        <!-- JS 會在這裡自動生成按鈕 -->
-      </div>
-
-    </div>
-
-    <footer class="pixel-ground"></footer>
-
-  </main>
-
-  <script>
-    // 1. 把你的 questions.json 內容直接貼進這個陣列裡！
-    const questionsData = [
-      {
-        "id": 1,
-        "scenario": "國王下令討伐魔王，你來到【斷掉的木腿】酒館準備招募隊友。面對滿屋子的奇裝異服，你挑選夥伴的標準是？",
-        "options": [
-          { "text": "感覺對了最重要！你看角落那個拿著平底鍋的精靈，我覺得跟他一定很合得來！", "scores": { "E": 1, "O": 1 } },
-          { "text": "讓我看看...那個劍士的盔甲在關節處有生鏽的痕跡，不行，戰力太不穩定了！", "scores": { "C": 1, "L": 1 } },
-          { "text": "隨便啦～誰今天願意請我喝這杯蜂蜜啤酒，我就勉為其難跟他組隊～", "scores": { "I": 1, "V": 1 } }
-        ]
-      },
-      // ⚠️ 請在這裡把剩下的 10 題依序貼上！
-    ];
-
-    // 2. 從 Local Storage 讀取目前進度與分數
-    let currentIndex = parseInt(localStorage.getItem('rpg_currentQuestionIndex')) || 0;
-    let scores = JSON.parse(localStorage.getItem('rpg_scores')) || { L: 0, O: 0, I: 0, D: 0, E: 0, G: 0, C: 0, V: 0 };
-
-    // 3. 負責渲染畫面的函數
-    function renderQuestion() {
-      const currentQ = questionsData[currentIndex];
-
-      // 更新題目文字
-      document.getElementById('question-text').innerText = currentQ.scenario;
-
-      // 更新選項按鈕
-      const optionsContainer = document.getElementById('options-container');
-      optionsContainer.innerHTML = ''; // 清空舊按鈕
-
-      currentQ.options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.className = "w-full text-left bg-[#e8e6df] pixel-border-box p-4 text-sm leading-relaxed pixel-button shadow-pixel";
-        btn.innerText = option.text;
-
-        // 綁定點擊事件
-        btn.onclick = () => handleOptionClick(option.scores);
-        optionsContainer.appendChild(btn);
-      });
-
-      // 更新進度條 (動態生成 11 格)
-      const progressContainer = document.getElementById('progress-bar-container');
-      progressContainer.innerHTML = ''; // 清空舊進度
-      for (let i = 0; i < questionsData.length; i++) {
-        const block = document.createElement('div');
-        // 如果該題已經答過或正在答 (小於等於目前題號)，顯示深色；否則顯示淺色
-        block.className = `h-3 flex-1 ${i <= currentIndex ? 'bg-[#4a4a18]' : 'bg-[#d3d0b8]'}`;
-        progressContainer.appendChild(block);
-      }
-    }
-
-    // 4. 處理點擊選項的邏輯
-    function handleOptionClick(optionScores) {
-      // 加上這題的分數
-      for (const key in optionScores) {
-        scores[key] += optionScores[key];
-      }
-
-      // 存回倉庫
-      localStorage.setItem('rpg_scores', JSON.stringify(scores));
-
-      // 進入下一題或結束
-      currentIndex++;
-      localStorage.setItem('rpg_currentQuestionIndex', currentIndex);
-
-      if (currentIndex < questionsData.length) {
-        renderQuestion(); // 還沒答完，刷新畫面顯示下一題
-      } else {
-        // 11 題都答完了，跳轉到結算過場頁！
         window.location.href = 'Loading.html';
       }
     }
-
-    // 5. 網頁載入時，立刻印出第一題
-    renderQuestion();
   </script>
 </body>
 </html>
