@@ -43,6 +43,15 @@
   </style>
 </head>
 
+<!-- 👑 新增：初始載入遮罩 (會蓋住整個螢幕，為預載圖片爭取時間) -->
+  <div id="initial-loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-pixel-surface transition-opacity duration-500">
+    <p class="text-sm font-bold animate-pulse text-gray-800 tracking-widest bg-white p-4 rounded pixel-border-box shadow-pixel relative">
+      <span class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></span>
+      正在展開魔法地圖・・・
+    </p>
+  </div>
+
+
 <!-- 將 body 設為滿版，並加入 transition-all 讓背景切換時有漸變效果 -->
 <body id="game-body" class="flex justify-center min-h-[100dvh] font-sans antialiased text-gray-800 bg-center bg-cover bg-no-repeat pixelated transition-all duration-700">
 
@@ -95,6 +104,17 @@
         });
 
         renderQuestion();
+
+        //下載頁面等2.5秒
+        setTimeout(() => {
+          const loader = document.getElementById('initial-loader');
+          // 加上透明度變 0 的動畫
+          loader.classList.add('opacity-0');
+          // 等動畫跑完 0.5 秒後，把遮罩徹底隱藏，讓玩家無法點到它
+          setTimeout(() => {
+            loader.classList.add('hidden');
+          }, 500);
+        }, 2500);
       })
       .catch(error => {
         console.error(error);
