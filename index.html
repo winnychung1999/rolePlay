@@ -33,6 +33,7 @@
     }
   </script>
   <style data-purpose="custom-utilities">
+    /* 確保背景圖片放大時保持像素的顆粒感，不會變模糊 */
     .pixelated { image-rendering: pixelated; }
     .border-pixel { border: 4px solid #1A1A1A; }
     input::placeholder {
@@ -41,16 +42,29 @@
     }
   </style>
 </head>
-<body class="bg-gray-900 flex justify-center min-h-screen font-sans antialiased text-gray-800">
-  <div class="w-full max-w-[400px] h-full min-h-[850px] relative bg-pixel-blue overflow-hidden shadow-2xl flex flex-col">
-    <div class="absolute inset-0 pointer-events-none z-0">
-      <div class="absolute top-32 left-0 w-32 h-32 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
-      <div class="absolute top-64 right-0 w-48 h-48 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
+
+<!-- 重點 1：將 background.png 設為 body 的背景，固定在底部並向兩側延伸 -->
+<body class="flex justify-center min-h-[100dvh] font-sans antialiased text-gray-800 bg-bottom bg-cover bg-no-repeat pixelated"
+      style="background-image: url('Assets/backgroundLanding.png');">
+
+  <!-- 重點 2：移除原本的背景色，讓中央區塊變成透明，並限制最大寬度模擬手機 -->
+  <div class="w-full max-w-[400px] min-h-[100dvh] relative flex flex-col justify-center px-6">
+
+    <!-- 漂浮的光影裝飾 (保留你原本的設定) -->
+    <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+      <div class="absolute top-1/4 left-0 w-32 h-32 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
+      <div class="absolute top-1/2 right-0 w-48 h-48 bg-pixel-sky opacity-50 pixelated mix-blend-overlay"></div>
     </div>
-    <main class="flex-1 relative z-10 flex flex-col px-6 pt-12 pb-24 items-center">
-      <h1 class="text-xl font-bold text-center mb-6 tracking-wide drop-shadow-sm font-sans">
+
+    <!-- 核心內容區 (置中對齊) -->
+    <main class="relative z-10 flex flex-col items-center w-full">
+
+      <!-- 標題 -->
+      <h1 class="text-xl font-bold text-center mb-6 tracking-wide drop-shadow-[0_2px_2px_rgba(255,255,255,0.8)] font-sans">
         勇者小隊隱藏人設鑑定
       </h1>
+
+      <!-- 故事背景框 -->
       <div class="bg-pixel-yellow p-4 mb-6 relative z-10 w-full shadow-pixel" data-purpose="intro-description">
         <div class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></div>
         <p class="text-[13px] leading-relaxed font-semibold tracking-wide">
@@ -60,6 +74,7 @@
         </p>
       </div>
 
+      <!-- 表單區塊 -->
       <div class="bg-pixel-surface w-full p-6 shadow-pixel relative z-10" data-purpose="character-form">
         <div class="absolute -inset-1 bg-white -z-10 shadow-pixel transform translate-x-1 translate-y-1"></div>
 
@@ -80,7 +95,6 @@
               <input class="peer sr-only" name="hero_gender" type="radio" value="female"/>
               <div class="bg-pixel-bg-dim p-2 flex flex-col items-center border-4 border-transparent peer-checked:border-pixel-yellow transition-colors pb-3 bg-white shadow-[inset_0_0_0_2px_#E0E0E0]">
                 <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm border border-gray-200">
-                  <!-- 指向 Assets 資料夾 -->
                   <img alt="Female Hero Sprite" class="w-12 h-12 pixelated object-contain" src="./Assets/female.png"/>
                 </div>
                 <span class="text-sm font-bold text-gray-700">女勇者</span>
@@ -91,7 +105,6 @@
               <input checked="" class="peer sr-only" name="hero_gender" type="radio" value="male"/>
               <div class="bg-pixel-bg-dim p-2 flex flex-col items-center border-4 border-transparent peer-checked:border-pixel-yellow transition-colors pb-3 bg-white shadow-[inset_0_0_0_2px_#E0E0E0]">
                 <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm border border-gray-200">
-                  <!-- 指向 Assets 資料夾 -->
                   <img alt="Male Hero Sprite" class="w-12 h-12 pixelated object-contain" src="./Assets/male.png"/>
                 </div>
                 <span class="text-sm font-bold text-gray-700">男勇者</span>
@@ -106,10 +119,8 @@
       </div>
     </main>
 
-    <div class="absolute bottom-0 left-0 w-full z-20 flex flex-col h-24" data-purpose="ground-decoration">
-      <div class="h-8 w-full bg-[#7CB342] pixelated flex" style="background-image: linear-gradient(90deg, #689F38 25%, transparent 25%, transparent 50%, #558B2F 50%, #558B2F 75%, transparent 75%, transparent); background-size: 32px 100%;"></div>
-      <div class="flex-1 w-full bg-[#795548] pixelated flex" style="background-image: linear-gradient(90deg, #5D4037 25%, transparent 25%, transparent 50%, #4E342E 50%, #4E342E 75%, transparent 75%, transparent); background-size: 64px 100%;"></div>
-    </div>
+    <!-- 已經移除了原本用 CSS 畫的假草地，因為背景圖自帶了！ -->
+
   </div>
 
   <script>
@@ -119,17 +130,12 @@
         alert("請輸入勇者的大名！");
         return;
       }
-
       const gender = document.querySelector('input[name="hero_gender"]:checked').value;
-
       localStorage.setItem('rpg_userName', heroName);
       localStorage.setItem('rpg_userGender', gender);
       localStorage.setItem('rpg_currentQuestionIndex', '0');
-
       const initialScores = { L: 0, O: 0, I: 0, D: 0, E: 0, G: 0, C: 0, V: 0 };
       localStorage.setItem('rpg_scores', JSON.stringify(initialScores));
-
-      // 跳轉到測驗頁面
       window.location.href = 'Quiz.html';
     });
   </script>
