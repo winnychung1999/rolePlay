@@ -11,15 +11,12 @@
   <style data-purpose="custom-fonts">
     @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
+    /* 將 body 的預設背景設為白色，這樣疊加上透明色碼時才會有明亮粉嫩的感覺 */
     body {
       font-family: 'DotGothic16', sans-serif;
-      /* 將原本的 #333333 改成淺灰色，讓透明卡片透出亮光 */
       background-color: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       margin: 0;
+      padding: 0;
     }
   </style>
 
@@ -67,17 +64,18 @@
     }
   </style>
 </head>
-<body>
-  <!-- 結算卡片主體 (背景色動態替換 77% 透明度) -->
-  <main id="capture-area" class="w-full max-w-[378px] min-h-[794px] overflow-hidden relative shadow-2xl flex flex-col transition-colors duration-500">
 
+<!-- 網頁最外層：加入過渡動畫，負責顯示滿版顏色 -->
+<body id="page-body" class="flex justify-center items-center min-h-[100dvh] transition-colors duration-700">
 
+  <!-- 結算卡片主體：限制最大高度 850px 並使用 justify-between 自動排版，免滑動、不壓扁！ -->
+  <main id="capture-area" class="w-full max-w-[390px] h-[100dvh] max-h-[850px] bg-white/10 relative shadow-2xl flex flex-col p-4">
 
-    <!-- 內容區 -->
-    <div class="flex-1 overflow-y-auto px-4 pt-6 pb-24">
+    <!-- 內容區 (利用 flex-1 與 justify-between 讓區塊自動均勻分佈，拿掉寫死的 margin) -->
+    <div class="flex-1 flex flex-col justify-between">
 
       <!-- 標題與大頭貼 -->
-      <section class="flex justify-between items-start mb-6">
+      <section class="flex justify-between items-start">
         <div class="flex flex-col space-y-2 mt-2">
           <p class="text-sm font-bold text-gray-900 tracking-wide">其實勇者</p>
           <h1 id="user-name-display" class="text-2xl font-black tracking-widest text-black">【勇者】</h1>
@@ -92,7 +90,7 @@
       </section>
 
       <!-- 冒險日常 -->
-      <section class="mb-4 flex pixel-border bg-white h-auto min-h-[70px]">
+      <section class="flex pixel-border bg-white h-auto min-h-[70px]">
         <div class="w-1/3 bg-light-gray-header flex items-center justify-center text-center p-2 border-r-4 border-[#3e2723]">
           <span class="font-bold text-sm leading-tight">你的<br/>冒險日常</span>
         </div>
@@ -102,7 +100,7 @@
       </section>
 
       <!-- 性格與致命弱點 -->
-      <section class="flex gap-4 mb-4">
+      <section class="flex gap-4">
 
         <!-- 左側：長條圖能力值 -->
         <div class="w-1/2 flex flex-col pixel-border bg-white min-h-[140px]">
@@ -110,19 +108,19 @@
             <span class="font-bold text-sm">你的性格・・・</span>
           </div>
           <div id="stats-container" class="flex-1 p-3 bg-white flex flex-col justify-center gap-2">
-            <!-- 動態生成前三高的屬性條 -->
+            <!-- 動態生成前四高的屬性條 -->
           </div>
         </div>
 
         <!-- 右側：標籤與弱點 -->
         <div class="w-1/2 flex flex-col gap-3">
-          <div class="pixel-border bg-white p-2">
+          <div class="pixel-border bg-white p-2 flex-1">
             <h3 id="tag1-display" class="font-bold text-[11px] mb-1 border-b-2 border-gray-200 pb-1 text-gray-900">🗲 標籤 1</h3>
             <p id="tag2-display" class="text-[10px] mb-2 leading-tight font-bold text-gray-700">標籤 2</p>
             <p id="tag3-display" class="text-[10px] font-bold text-right text-gray-900">標籤 3</p>
           </div>
 
-          <div class="pixel-border bg-white flex flex-col h-full justify-between">
+          <div class="pixel-border bg-white flex flex-col flex-1">
             <div class="bg-light-gray-header p-1.5 text-center border-b-2 border-gray-300">
               <span class="text-[11px] font-bold">你的致命弱點</span>
             </div>
@@ -134,14 +132,14 @@
       </section>
 
       <!-- 完美連擊 & 互相傷害 (圖片版) -->
-      <section class="flex gap-4 mb-6">
+      <section class="flex gap-4">
         <div class="w-1/2 pixel-border bg-white flex flex-col">
           <div class="bg-white p-1.5 text-center border-b-4 border-[#3e2723]">
             <span class="font-bold text-sm">完美連擊</span>
           </div>
           <div class="flex-1 p-2 bg-light-gray-header flex flex-col items-center justify-center min-h-[80px]">
             <div id="combo-img-container" class="flex justify-center gap-2 mb-1 w-full flex-wrap"></div>
-             </div>
+          </div>
         </div>
 
         <div class="w-1/2 pixel-border bg-white flex flex-col">
@@ -149,227 +147,146 @@
             <span class="font-bold text-sm">互相傷害</span>
           </div>
           <div class="flex-1 p-2 bg-light-gray-header flex flex-col items-center justify-center min-h-[80px]">
-             <div id="enemy-img-container" class="flex justify-center gap-2 mb-1 w-full flex-wrap"></div>
-               </div>
+            <div id="enemy-img-container" class="flex justify-center gap-2 mb-1 w-full flex-wrap"></div>
+          </div>
         </div>
       </section>
 
-      <!-- 按鈕區塊 -->
-      <!--
-      <section id="action-buttons" class="flex justify-center gap-4 mt-2">
-        <button id="download-btn" class="bg-white text-black font-bold py-2 px-3 border-2 border-white shadow-md text-xs active:translate-y-1 active:shadow-none transition-all pixel-box-shadow cursor-pointer">
-          下載圖片
-        </button>
-        <button id="copy-btn" class="bg-white text-black font-bold py-2 px-3 border-2 border-white shadow-md text-xs active:translate-y-1 active:shadow-none transition-all pixel-box-shadow cursor-pointer">
-          複製文字
-        </button>
-      </section>
-      -->
-
     </div>
-
-
   </main>
 
   <script>
     // 1. 讀取 Storage 資訊
-  const userName = localStorage.getItem('rpg_userName') || '冒險者';
-  const userGender = localStorage.getItem('rpg_userGender') || 'female';
-  const userScores = JSON.parse(localStorage.getItem('rpg_scores')) || { L: 3, O: 1, I: 0, D: 0, E: 0, G: 2, C: 0, V: 4 };
+    const userName = localStorage.getItem('rpg_userName') || '冒險者';
+    const userGender = localStorage.getItem('rpg_userGender') || 'female';
+    const userScores = JSON.parse(localStorage.getItem('rpg_scores')) || { L: 3, O: 1, I: 0, D: 0, E: 0, G: 2, C: 0, V: 4 };
 
-  let charactersDatabase = [];
-  let matchedCharacter = null;
+    let charactersDatabase = [];
+    let matchedCharacter = null;
 
-  // 2. 透過 fetch 讀取外部的 role.json
-  fetch('./role.json')
-    .then(response => {
-      if (!response.ok) throw new Error('找不到 role.json 檔案！');
-      return response.json();
-    })
-    .then(data => {
-      charactersDatabase = data;
+    // 2. 透過 fetch 讀取外部的 role.json
+    fetch('./role.json')
+      .then(response => {
+        if (!response.ok) throw new Error('找不到 role.json 檔案！');
+        return response.json();
+      })
+      .then(data => {
+        charactersDatabase = data;
 
-      // 3. 計算最高分角色 (支援官方同分優先順位 + 方案二：最高屬性門檻過濾)
+        // 3. 計算最高分角色 (支援官方同分優先順位 + 方案二：最高屬性門檻過濾)
+        const priorityOrder = [
+          "精算軍師", "硬核隊長", "千面間諜", "尋寶獵人", "混亂魔法師",
+          "派對精靈", "治癒牧師", "天選勇者", "無辜村民", "吃瓜旅人"
+        ];
 
-      const priorityOrder = [
-        "精算軍師",
-        "硬核隊長",
-        "千面間諜",
-        "尋寶獵人",
-        "混亂魔法師",
-        "派對精靈",
-        "治癒牧師",
-        "天選勇者",
-        "無辜村民",
-        "吃瓜旅人"
-      ];
+        let maxSingleAttrScore = -1;
+        let topAttributes = [];
 
-      // 第一步：找出玩家單項最高分的屬性是誰 (抓出靈魂屬性)
-      let maxSingleAttrScore = -1;
-      let topAttributes = [];
-
-      for (let attr in userScores) {
-        let score = Number(userScores[attr] || 0);
-        if (score > maxSingleAttrScore) {
-          maxSingleAttrScore = score;
-          topAttributes = [attr];
-        } else if (score === maxSingleAttrScore) {
-          // 如果有多個並列最高分的屬性，就一起加進名單
-          topAttributes.push(attr);
+        for (let attr in userScores) {
+          let score = Number(userScores[attr] || 0);
+          if (score > maxSingleAttrScore) {
+            maxSingleAttrScore = score;
+            topAttributes = [attr];
+          } else if (score === maxSingleAttrScore) {
+            topAttributes.push(attr);
+          }
         }
-      }
 
-      // 第二步：發放決賽入場券 (過濾出擁有玩家最高分屬性的角色)
-      let eligibleCharacters = charactersDatabase.filter(char => {
-        // 只要角色的屬性中，包含玩家的最高分屬性之一，就給過
-        return char.attributes.some(attr => topAttributes.includes(attr));
-      });
-
-      // 防呆機制：如果極端情況下全部被淘汰，就讓所有角色敗部復活
-      if (eligibleCharacters.length === 0) {
-        eligibleCharacters = charactersDatabase;
-      }
-
-      // 第三步：幫晉級決賽的角色計算總分
-      let scoredCharacters = eligibleCharacters.map(char => {
-        let currentTotal = 0;
-        char.attributes.forEach(attr => {
-          currentTotal += Number(userScores[attr] || 0);
+        let eligibleCharacters = charactersDatabase.filter(char => {
+          return char.attributes.some(attr => topAttributes.includes(attr));
         });
-        return { char: char, score: currentTotal };
-      });
 
-      // 第四步：找出晉級名單中的最高總分
-      let highestTotalScore = Math.max(...scoredCharacters.map(item => item.score));
+        if (eligibleCharacters.length === 0) {
+          eligibleCharacters = charactersDatabase;
+        }
 
-      // 第五步：抓出所有達到「最高總分」的候選角色
-      let topCandidates = scoredCharacters.filter(item => item.score === highestTotalScore).map(item => item.char);
+        let scoredCharacters = eligibleCharacters.map(char => {
+          let currentTotal = 0;
+          char.attributes.forEach(attr => {
+            currentTotal += Number(userScores[attr] || 0);
+          });
+          return { char: char, score: currentTotal };
+        });
 
-      // 第六步：終極同分對決（依照 priorityOrder 查表排序）
-      topCandidates.sort((a, b) => {
-        let indexA = priorityOrder.indexOf(a.name);
-        let indexB = priorityOrder.indexOf(b.name);
+        let highestTotalScore = Math.max(...scoredCharacters.map(item => item.score));
+        let topCandidates = scoredCharacters.filter(item => item.score === highestTotalScore).map(item => item.char);
 
-        if (indexA === -1) indexA = 999;
-        if (indexB === -1) indexB = 999;
+        topCandidates.sort((a, b) => {
+          let indexA = priorityOrder.indexOf(a.name);
+          let indexB = priorityOrder.indexOf(b.name);
+          if (indexA === -1) indexA = 999;
+          if (indexB === -1) indexB = 999;
+          return indexA - indexB;
+        });
 
-        return indexA - indexB;
-      });
+        matchedCharacter = topCandidates[0] || charactersDatabase[0];
 
-      // 最終結果：拿排序後的第一名！
-      matchedCharacter = topCandidates[0] || charactersDatabase[0];
+        // 👑 4. 將顏色填滿整個網頁 (套用在最外層的 body 上，卡片維持純白)
+        // 在 16進制色碼後面加上 'C4' (約等於 77% 的透明度)
+        document.getElementById('page-body').style.backgroundColor = matchedCharacter.color + 'C4';
 
-      // 4. 動態更換背景色 (加入 'C4'，即 77% 透明度)
-      document.getElementById('capture-area').style.backgroundColor = matchedCharacter.color + 'C4';
+        // 5. 填寫文字與主圖片
+        document.getElementById('user-name-display').innerText = `【${userName}】`;
+        document.getElementById('character-name-display').innerHTML = `${matchedCharacter.name} <span class="text-xl">!</span>`;
+        document.getElementById('routine-display').innerText = matchedCharacter.routine;
+        document.getElementById('tag1-display').innerText = matchedCharacter.tag1;
+        document.getElementById('tag2-display').innerText = matchedCharacter.tag2;
+        document.getElementById('tag3-display').innerText = matchedCharacter.tag3;
+        document.getElementById('weakness-display').innerText = matchedCharacter.weakness;
 
-      // 5. 填寫文字與主圖片 (修正主圖變數名稱)
-      document.getElementById('user-name-display').innerText = `【${userName}】`;
-      document.getElementById('character-name-display').innerHTML = `${matchedCharacter.name} <span class="text-xl">!</span>`;
-      document.getElementById('routine-display').innerText = matchedCharacter.routine;
-      document.getElementById('tag1-display').innerText = matchedCharacter.tag1;
-      document.getElementById('tag2-display').innerText = matchedCharacter.tag2;
-      document.getElementById('tag3-display').innerText = matchedCharacter.tag3;
-      document.getElementById('weakness-display').innerText = matchedCharacter.weakness;
+        document.getElementById('character-img').src = userGender === 'female' ? matchedCharacter.femaleImg : matchedCharacter.maleImg;
 
-      // JS 會自動判斷性別，並把對應的圖片路徑「塞進」那個空相框裡
-    document.getElementById('character-img').src = userGender === 'female' ? matchedCharacter.femaleImg : matchedCharacter.maleImg;
+        // 6. 渲染長條圖 (前四高屬性，帶中文翻譯)
+        const statsContainer = document.getElementById('stats-container');
+        const attributeMap = {
+          "L": "邏輯", "O": "細節", "I": "直覺", "D": "偽裝",
+          "E": "共情", "G": "領導", "C": "佛系", "V": "氣氛"
+        };
 
-      // 6. 渲染長條圖 (前四高屬性，帶中文翻譯，不顯示具體數值)
-      const statsContainer = document.getElementById('stats-container');
+        const sortedScores = Object.entries(userScores).sort((a, b) => b[1] - a[1]).slice(0, 4);
+        const maxScore = Math.max(sortedScores[0][1], 1);
 
-      // 建立英文轉中文的字典
-      const attributeMap = {
-        "L": "邏輯", "O": "細節", "I": "直覺", "D": "偽裝",
-        "E": "共情", "G": "領導", "C": "佛系", "V": "氣氛"
-      };
+        sortedScores.forEach(([key, value]) => {
+          const percentage = (value / maxScore) * 100;
+          const chineseName = attributeMap[key] || key;
 
-      // 改成 slice(0, 4) 抓取前四名
-      const sortedScores = Object.entries(userScores).sort((a, b) => b[1] - a[1]).slice(0, 4);
-      const maxScore = Math.max(sortedScores[0][1], 1); // 以最高分作為 100% 的基準
-
-      sortedScores.forEach(([key, value]) => {
-        const percentage = (value / maxScore) * 100;
-        const chineseName = attributeMap[key] || key;
-
-        // 拿掉了最右邊顯示數值的 <span>，讓進度條可以更長
-        statsContainer.innerHTML += `
-          <div class="flex items-center text-xs font-bold gap-2 w-full">
-            <span class="w-8 text-right text-gray-800 shrink-0">${chineseName}</span>
-            <div class="stat-bar flex-2"><div class="stat-fill" style="width: ${percentage}%"></div></div>
-          </div>
-        `;
-      });
-
-      // 7. 渲染連擊/傷害頭像
-      renderMiniAvatars('combo-img-container', matchedCharacter.combo);
-      renderMiniAvatars('enemy-img-container', matchedCharacter.enemy);
-
-    })
-    .catch(error => {
-      console.error(error);
-      alert('無法載入角色資料，請確認是否使用 Live Server 開啟！');
-    });
-
-  // 輔助函數：渲染底部連擊圖片與專屬名字 (新寫法：圖與名字綁定)
-  function renderMiniAvatars(containerId, charNames) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = ''; // 清空容器
-
-    charNames.forEach(name => {
-      const foundChar = charactersDatabase.find(c => c.name === name);
-      if (foundChar) {
-        const imgSrc = userGender === 'female' ? foundChar.femaleImg : foundChar.maleImg;
-        // 把每個頭像和名字包在同一個 flex-col 的小盒子裡
-        container.innerHTML += `
-          <div class="flex flex-col items-center gap-1">
-            <div class="w-16 h-20 bg-white border-2 border-[#3e2723] overflow-hidden shrink-0">
-              <img src="${imgSrc}" class="w-full h-full object-cover p-0.5"/>
+          statsContainer.innerHTML += `
+            <div class="flex items-center text-xs font-bold gap-2 w-full">
+              <span class="w-8 text-right text-gray-800 shrink-0">${chineseName}</span>
+              <div class="stat-bar flex-2"><div class="stat-fill" style="width: ${percentage}%"></div></div>
             </div>
-            <span class="text-[10px] font-bold text-gray-800 leading-tight">${name}</span>
-          </div>
-        `;
-      }
-    });
-  }
+          `;
+        });
 
-  // 8. 自訂複製文字功能
-  document.getElementById('copy-btn').addEventListener('click', () => {
-    if(!matchedCharacter) return;
-    const comboText = matchedCharacter.combo.join('與');
-    const shareText = `我在勇者小隊的隱藏職業竟然是【${matchedCharacter.name}】！🤣\n我的完美連擊是【${comboText}】，誰來把我帶走？\n快來推開酒館大門，測測你的異世界人設：https://winnychung1999.github.io/`;
+        // 7. 渲染連擊/傷害頭像
+        renderMiniAvatars('combo-img-container', matchedCharacter.combo);
+        renderMiniAvatars('enemy-img-container', matchedCharacter.enemy);
 
-    navigator.clipboard.writeText(shareText).then(() => {
-      alert('測驗結果文字已複製到剪貼簿！');
-    }).catch(err => {
-      alert('複製失敗，請手動選取複製！');
-    });
-  });
+      })
+      .catch(error => {
+        console.error(error);
+        alert('無法載入角色資料，請確認是否使用 Live Server 開啟！');
+      });
 
-  // 9. 隱藏按鈕再截圖的魔術 (終極修復白畫面與黑邊 Bug)
-  document.getElementById('download-btn').addEventListener('click', () => {
-  const captureArea = document.getElementById('capture-area');
-  const actionButtons = document.getElementById('action-buttons');
+    function renderMiniAvatars(containerId, charNames) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
 
-  actionButtons.style.display = 'none';
-  window.scrollTo(0, 0);
-
-  html2canvas(captureArea, {
-    scale: 2,
-    backgroundColor: captureArea.style.backgroundColor,
-    useCORS: true,
-    scrollY: 0,
-    scrollX: 0,
-    width: 378,        // 新增：強制輸出寬度固定 378px
-    windowWidth: 378,  // 新增：強制內部版面計算也用 378px 寬的視窗去模擬
-  }).then(canvas => {
-    actionButtons.style.display = 'flex';
-
-    const link = document.createElement('a');
-    link.download = `${userName}_隱藏人設結果.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  });
-});
+      charNames.forEach(name => {
+        const foundChar = charactersDatabase.find(c => c.name === name);
+        if (foundChar) {
+          const imgSrc = userGender === 'female' ? foundChar.femaleImg : foundChar.maleImg;
+          container.innerHTML += `
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-16 h-20 bg-white border-2 border-[#3e2723] overflow-hidden shrink-0">
+                <img src="${imgSrc}" class="w-full h-full object-cover p-0.5"/>
+              </div>
+              <span class="text-[10px] font-bold text-gray-800 leading-tight">${name}</span>
+            </div>
+          `;
+        }
+      });
+    }
 
   </script>
 </body>
