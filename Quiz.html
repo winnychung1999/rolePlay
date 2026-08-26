@@ -76,6 +76,9 @@
     let currentIndex = parseInt(localStorage.getItem('rpg_currentQuestionIndex')) || 0;
     let scores = JSON.parse(localStorage.getItem('rpg_scores')) || { L: 0, O: 0, I: 0, D: 0, E: 0, G: 0, C: 0, V: 0 };
 
+    // 👑 新增：告訴大腦我們總共有 5 章的背景圖需要預先藏進口袋！
+    const preloadImages = ['Quiz1.png', 'Quiz2.png', 'Quiz3.png', 'Quiz4.png', 'Quiz5.png'];
+
     // 1. 讀取題目 JSON
     fetch('./questions.json')
       .then(response => {
@@ -84,6 +87,13 @@
       })
       .then(data => {
         questionsData = data;
+
+        // 👑 新增：在遊戲開始前，偷偷用 Image() 物件把所有背景圖下載到快取 (Cache) 裡
+        preloadImages.forEach(src => {
+          const img = new Image();
+          img.src = src;
+        });
+
         renderQuestion();
       })
       .catch(error => {
